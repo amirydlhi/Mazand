@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>زوون مازنی — یادگیری واژگان مازندرانی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-cream: #F5F0E8;
+            --bg-cream-light: #FDFBF7;
+            --bg-dark: #1A1714;
+            --fg-dark: #2C2520;
+            --fg-light: #F5F0E8;
+            --fg-muted: #8B7E74;
+            --fg-muted-light: #A69E94;
+            --accent-gold: #C8A96E;
+            --border-warm: #E2D9CC;
+            --border-dark: #3D3630;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{font-family:'Vazirmatn',sans-serif;background:var(--bg-cream);color:var(--fg-dark);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+        /* ناوبری */
+        .navbar{position:fixed;top:0;right:0;left:0;z-index:100;padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,padding .4s,border-color .4s;border-bottom:1px solid transparent}
+        .navbar.scrolled{background:rgba(26,23,20,.97);border-bottom-color:var(--border-dark);padding:.85rem 2rem}
+        .nav-logo{display:flex;align-items:center;gap:1rem}
+        .logo-seal{width:44px;height:44px;border:1.5px solid var(--accent-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--accent-gold);line-height:1.15;text-align:center;flex-shrink:0}
+        .logo-seal-initial{font-size:1rem;display:block}
+        .nav-tagline{font-size:.75rem;font-weight:300;color:var(--fg-muted-light);letter-spacing:.02em;opacity:0;transition:opacity .4s}
+        .navbar.scrolled .nav-tagline{opacity:1}
+        .nav-cta{font-size:.8rem;font-weight:500;color:var(--fg-light);border:1px solid var(--fg-muted-light);padding:.5rem 1.25rem;border-radius:2px;text-decoration:none;transition:all .3s;letter-spacing:.01em}
+        .nav-cta:hover{background:var(--fg-light);color:var(--bg-dark)}
+
+        /* هیرو */
+        .hero{position:relative;height:100vh;min-height:600px;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}
+        .hero-bg{position:absolute;inset:0;background:url('https://picsum.photos/seed/mazandaran-jungle-river/1920/1080') center/cover no-repeat;animation:kenBurns 25s ease-in-out infinite alternate}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,23,20,.72) 0%,rgba(26,23,20,.82) 50%,rgba(26,23,20,.95) 100%)}
+        .hero-content{position:relative;z-index:2;text-align:center;padding:0 1.5rem}
+        .hero-label{display:inline-block;font-size:.7rem;font-weight:400;color:var(--accent-gold);letter-spacing:.15em;border-bottom:1px solid var(--accent-gold);padding-bottom:.35rem;margin-bottom:2rem}
+        .hero-word{font-size:clamp(4rem,14vw,11rem);font-weight:900;color:var(--fg-light);line-height:1;letter-spacing:-.02em;margin-bottom:1rem}
+        .hero-translation{font-size:clamp(1.25rem,3vw,2rem);font-weight:200;color:var(--fg-muted-light);margin-bottom:.75rem}
+        .hero-pronunciation{font-size:.85rem;font-weight:300;color:var(--fg-muted);letter-spacing:.12em;font-family:'Courier New',monospace;direction:ltr;unicode-bidi:embed}
+        .hero-footer{position:absolute;bottom:4rem;left:0;right:0;z-index:2;display:flex;justify-content:center;gap:2.5rem;font-size:.7rem;font-weight:300;color:var(--fg-muted);letter-spacing:.08em;flex-wrap:wrap;padding:0 1rem}
+        .hero-footer span::before{content:'';display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--accent-gold);margin-left:.75rem;vertical-align:middle}
+        .scroll-indicator{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:2;animation:scrollBounce 2s ease-in-out infinite}
+        .scroll-indicator svg{width:20px;height:20px;stroke:var(--fg-muted)}
+
+        /* نوار آمار */
+        .stats-bar{background:var(--bg-dark);padding:1.25rem 2rem;display:flex;justify-content:center;align-items:center;gap:2.5rem;flex-wrap:wrap}
+        .stat-item{text-align:center}
+        .stat-number{display:block;font-size:1.35rem;font-weight:700;color:var(--fg-light);line-height:1.2}
+        .stat-label{font-size:.65rem;font-weight:300;color:var(--fg-muted);letter-spacing:.1em;margin-top:.15rem}
+        .stat-divider{width:1px;height:28px;background:var(--border-dark)}
+
+        /* فلش‌کارت */
+        .flashcard-section{background:var(--bg-cream);padding:4rem 2rem 5rem;border-top:1px solid var(--border-warm)}
+        .fc-inner{max-width:900px;margin:0 auto}
+        .fc-tabs{display:flex;gap:.25rem;justify-content:center;margin-bottom:3rem;flex-wrap:wrap}
+        .fc-tab{display:flex;align-items:center;gap:.5rem;padding:.65rem 1.1rem;font-size:.8rem;font-weight:400;font-family:inherit;color:var(--fg-muted);background:none;border:1px solid transparent;border-radius:2px;cursor:pointer;transition:all .25s}
+        .fc-tab:hover{color:var(--fg-dark)}
+        .fc-tab.active{color:var(--fg-dark);font-weight:600;border-color:var(--border-warm);background:var(--bg-cream-light)}
+        .fc-tab svg{width:18px;height:18px;flex-shrink:0}
+        .fc-card-area{position:relative;display:flex;justify-content:center;align-items:center;height:440px;margin-bottom:2rem}
+        .fc-peek{position:absolute;width:280px;height:380px;background:var(--bg-cream-light);border:1px solid var(--border-warm);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:300;color:var(--fg-muted);opacity:0;transition:all .45s cubic-bezier(.25,.46,.45,.94);pointer-events:none}
+        .fc-peek.visible{opacity:.25}
+        .fc-peek-prev{transform:translateX(65%) scale(.88)}
+        .fc-peek-next{transform:translateX(-65%) scale(.88)}
+        .fc-card-container{position:relative;z-index:2;width:340px;height:400px;perspective:1200px;cursor:pointer}
+        .fc-card-inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+        .fc-card-inner.flipped{transform:rotateY(180deg)}
+        .fc-card-face{position:absolute;inset:0;backface-visibility:hidden;background:var(--bg-cream-light);border:1px solid var(--border-warm);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 2rem;text-align:center}
+        .fc-card-back{transform:rotateY(180deg)}
+        .fc-card-label{position:absolute;top:1.5rem;right:1.5rem;font-size:.6rem;font-weight:400;color:var(--accent-gold);letter-spacing:.12em}
+        .fc-card-word{font-size:2.8rem;font-weight:800;color:var(--fg-dark);line-height:1.3;margin-bottom:.75rem}
+        .fc-card-back .fc-card-word{font-size:2.2rem;font-weight:600}
+        .fc-card-pron{font-size:.85rem;font-weight:300;color:var(--fg-muted);letter-spacing:.1em;font-family:'Courier New',monospace;direction:ltr;unicode-bidi:embed}
+        .fc-card-hint{position:absolute;bottom:1.5rem;display:flex;align-items:center;gap:.4rem;font-size:.65rem;color:var(--fg-muted-light);transition:opacity .3s}
+        .fc-card-hint svg{width:16px;height:16px}
+        .fc-card-container:hover .fc-card-hint{opacity:.5}
+        .fc-card-number{position:absolute;bottom:1.5rem;left:1.5rem;font-size:.65rem;font-weight:300;color:var(--fg-muted-light);font-family:'Courier New',monospace;direction:ltr}
+        .fc-nav{display:flex;justify-content:center;align-items:center;gap:1.5rem;margin-bottom:2.5rem}
+        .fc-nav-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border-warm);border-radius:2px;cursor:pointer;transition:all .25s;color:var(--fg-dark)}
+        .fc-nav-btn:hover{background:var(--fg-dark);color:var(--fg-light);border-color:var(--fg-dark)}
+        .fc-nav-btn:disabled{opacity:.25;pointer-events:none}
+        .fc-nav-btn svg{width:20px;height:20px}
+        .fc-counter{font-size:.8rem;font-weight:300;color:var(--fg-muted);min-width:60px;text-align:center;font-family:'Courier New',monospace;direction:ltr}
+        .fc-strip{display:flex;gap:.5rem;justify-content:center;overflow-x:auto;padding:.5rem 0;scrollbar-width:none}
+        .fc-strip::-webkit-scrollbar{display:none}
+        .fc-strip-item{flex-shrink:0;padding:.45rem .85rem;font-size:.78rem;font-weight:400;font-family:inherit;color:var(--fg-muted);background:none;border:1px solid transparent;border-radius:2px;cursor:pointer;transition:all .25s;white-space:nowrap}
+        .fc-strip-item:hover{color:var(--fg-dark);border-color:var(--border-warm)}
+        .fc-strip-item.active{color:var(--accent-gold);font-weight:600;border-color:var(--accent-gold)}
+
+        /* صرف فعل */
+        .conjugation-section{background:var(--bg-dark);padding:5rem 2rem;border-top:1px solid var(--border-dark)}
+        .conj-inner{max-width:960px;margin:0 auto}
+        .conj-header{text-align:center;margin-bottom:3.5rem}
+        .conj-label{font-size:.65rem;font-weight:400;color:var(--accent-gold);letter-spacing:.15em;display:block;margin-bottom:1rem}
+        .conj-title{font-size:clamp(1.5rem,3vw,2.25rem);font-weight:800;color:var(--fg-light);line-height:1.3}
+        .conj-subtitle{font-size:.85rem;font-weight:300;color:var(--fg-muted);margin-top:.75rem}
+        .conj-table{width:100%;border-collapse:collapse}
+        .conj-table th{font-size:.6rem;font-weight:400;color:var(--accent-gold);letter-spacing:.12em;padding:.85rem .75rem;border-bottom:1px solid var(--border-dark);text-align:center;vertical-align:bottom}
+        .conj-table th:first-child{text-align:right}
+        .conj-table td{padding:.9rem .75rem;border-bottom:1px solid var(--border-dark);text-align:center;vertical-align:middle}
+        .conj-table tr:last-child td{border-bottom:none}
+        .conj-table .person-cell{font-size:.75rem;font-weight:300;color:var(--fg-muted);text-align:right;white-space:nowrap;padding-left:1.5rem}
+        .conj-maz{font-size:1.1rem;font-weight:700;color:var(--fg-light);display:block;line-height:1.4}
+        .conj-fa{font-size:.72rem;font-weight:300;color:var(--fg-muted);display:block;margin-top:.2rem}
+        .conj-pron{font-size:.65rem;font-weight:300;color:var(--fg-muted-light);font-family:'Courier New',monospace;direction:ltr;unicode-bidi:embed;display:block;margin-top:.15rem;opacity:.7}
+
+        /* درباره */
+        .about-section{background:var(--bg-cream);padding:6rem 2rem;border-top:1px solid var(--border-warm)}
+        .about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+        .about-label{font-size:.65rem;font-weight:400;color:var(--accent-gold);letter-spacing:.15em;display:block;margin-bottom:1rem}
+        .about-heading{font-size:clamp(1.75rem,3.5vw,2.75rem);font-weight:800;color:var(--fg-dark);line-height:1.35;margin-bottom:1.5rem}
+        .about-text p{font-size:.95rem;font-weight:300;color:var(--fg-muted);line-height:2;max-width:480px}
+        .about-image{position:relative;overflow:hidden;border-radius:4px;aspect-ratio:4/5}
+        .about-image img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) contrast(1.05);transition:transform .8s cubic-bezier(.25,.46,.45,.94)}
+        .about-image:hover img{transform:scale(1.04)}
+        .about-image::after{content:'';position:absolute;inset:0;border:1px solid var(--border-warm);border-radius:4px;pointer-events:none}
+
+        /* فوتر */
+        .site-footer{background:var(--bg-dark);padding:5rem 2rem 2.5rem;border-top:1px solid var(--border-dark)}
+        .footer-inner{max-width:720px;margin:0 auto;text-align:center}
+        .footer-logo{font-size:.7rem;font-weight:700;color:var(--accent-gold);letter-spacing:.12em;margin-bottom:2rem;display:inline-block;border:1px solid var(--accent-gold);padding:.35rem 1rem;border-radius:2px}
+        .footer-inner p{font-size:.88rem;font-weight:300;color:var(--fg-muted);line-height:2.1;margin-bottom:3rem;text-align:justify}
+        .footer-credit{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid var(--border-dark);font-size:.65rem;font-weight:300;color:var(--fg-muted);letter-spacing:.06em}
+
+        /* انیمیشن‌ها */
+        @keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.07)}}
+        @keyframes scrollBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+        @keyframes cardEnter{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94)}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+        .card-enter{animation:cardEnter .35s ease-out}
+
+        /* ریسپانسیو */
+        @media(max-width:1024px){.about-inner{grid-template-columns:1fr;gap:2.5rem}.about-image{max-width:400px;margin:0 auto}.about-text p{max-width:none}}
+        @media(max-width:768px){
+            .navbar{padding:1rem 1.25rem}.nav-tagline{display:none}
+            .hero-footer{gap:1.25rem;font-size:.6rem}
+            .stats-bar{gap:1.5rem;padding:1rem 1.25rem}.stat-number{font-size:1.1rem}
+            .flashcard-section{padding:2.5rem 1rem 4rem}
+            .fc-card-area{height:380px}.fc-card-container{width:290px;height:350px}
+            .fc-card-word{font-size:2.2rem}.fc-card-back .fc-card-word{font-size:1.8rem}
+            .fc-peek{display:none}
+            .fc-tabs{gap:0;margin-bottom:2rem}.fc-tab{padding:.5rem .75rem;font-size:.72rem}.fc-tab span.tab-text{display:none}
+            .conj-section{padding:3.5rem 1rem}
+            .conj-table{font-size:.9rem}.conj-maz{font-size:.95rem}
+            .about-section{padding:4rem 1.25rem}
+            .site-footer{padding:3.5rem 1.25rem 2rem}.footer-credit{flex-direction:column;gap:.5rem}
+        }
+        @media(max-width:480px){
+            .fc-card-container{width:260px;height:320px}.fc-card-word{font-size:1.9rem}
+            .fc-card-face{padding:2rem 1.25rem}
+            .conj-table .person-cell{font-size:.65rem;padding-left:.75rem}
+            .conj-maz{font-size:.85rem}.conj-fa{font-size:.65rem}.conj-pron{display:none}
+        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero-bg{animation:none}.scroll-indicator{animation:none}}
+        :focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+    </style>
+</head>
+<body>
+
+    <!-- ناوبری -->
+    <nav class="navbar" id="navbar" role="navigation" aria-label="ناوبری اصلی">
+        <div class="nav-logo">
+            <div class="logo-seal" aria-hidden="true"><span class="logo-seal-initial">ز</span>م</div>
+            <span class="nav-tagline">یادگیری واژگان مازندرانی</span>
+        </div>
+        <a href="#flashcards" class="nav-cta">شروع یادگیری</a>
+    </nav>
+
+    <!-- هیرو -->
+    <section class="hero" id="hero" aria-label="واژه‌ی امروز">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+            <span class="hero-label">واژه‌ی امروز</span>
+            <h1 class="hero-word" id="heroWord"></h1>
+            <p class="hero-translation" id="heroTranslation"></p>
+            <p class="hero-pronunciation" id="heroPron"></p>
+        </div>
+        <div class="hero-footer" aria-hidden="true">
+            <span>گویش: طبری</span>
+            <span>منطقه: مازندران</span>
+            <span id="heroDate"></span>
+        </div>
+        <div class="scroll-indicator" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- نوار آمار -->
+    <section class="stats-bar" aria-label="آمار">
+        <div class="stat-item"><span class="stat-number" id="totalWords">—</span><span class="stat-label">واژه</span></div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item"><span class="stat-number">۵</span><span class="stat-label">دسته‌بندی</span></div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item"><span class="stat-number">طبری</span><span class="stat-label">گویش</span></div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item"><span class="stat-number" id="seenCount">۰</span><span class="stat-label">دیده‌شده</span></div>
+    </section>
+
+    <!-- فلش‌کارت‌ها -->
+    <section class="flashcard-section" id="flashcards" aria-label="یادگیری فلش‌کارت">
+        <div class="fc-inner">
+            <div class="fc-tabs reveal" role="tablist" aria-label="دسته‌بندی" id="fcTabs"></div>
+            <div class="fc-card-area reveal" style="transition-delay:.1s" id="fcCardArea">
+                <div class="fc-peek fc-peek-prev" id="peekPrev" aria-hidden="true"></div>
+                <div class="fc-peek fc-peek-next" id="peekNext" aria-hidden="true"></div>
+                <div class="fc-card-container" id="cardContainer" role="button" tabindex="0" aria-label="کارت — کلیک برای ترجمه">
+                    <div class="fc-card-inner" id="cardInner">
+                        <div class="fc-card-face fc-card-front">
+                            <span class="fc-card-label">مازندرانی</span>
+                            <span class="fc-card-word" id="cardWordMaz"></span>
+                            <span class="fc-card-pron" id="cardPron"></span>
+                            <div class="fc-card-hint">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                                <span>برای ترجمه کلیک کنید</span>
+                            </div>
+                            <span class="fc-card-number" id="cardNum"></span>
+                        </div>
+                        <div class="fc-card-face fc-card-back">
+                            <span class="fc-card-label">فارسی</span>
+                            <span class="fc-card-word" id="cardWordFa"></span>
+                            <div class="fc-card-hint">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                                <span>برای بازگشت کلیک کنید</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fc-nav reveal" style="transition-delay:.2s">
+                <button class="fc-nav-btn" id="btnPrev" aria-label="قبلی">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                <span class="fc-counter" id="fcCounter"></span>
+                <button class="fc-nav-btn" id="btnNext" aria-label="بعدی">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+            </div>
+            <div class="fc-strip reveal" style="transition-delay:.3s" id="wordStrip" role="listbox" aria-label="لیست واژه‌ها"></div>
+        </div>
+    </section>
+
+    <!-- صرف فعل رفتن -->
+    <section class="conjugation-section" id="conjugation" aria-label="صرف فعل">
+        <div class="conj-inner reveal">
+            <div class="conj-header">
+                <span class="conj-label">صرف فعل</span>
+                <h2 class="conj-title">فعل «رفتن» به گویش مازندرانی</h2>
+                <p class="conj-subtitle">سه زمان گذشته، حال و آینده با تلفظ فارسی</p>
+            </div>
+            <div style="overflow-x:auto">
+                <table class="conj-table" id="conjTable"></table>
+            </div>
+        </div>
+    </section>
+
+    <!-- درباره -->
+    <section class="about-section" id="about" aria-label="درباره‌ی زبان طبری">
+        <div class="about-inner">
+            <div class="about-text reveal">
+                <span class="about-label">زمینه</span>
+                <h2 class="about-heading">طبری، نه گیلکی</h2>
+                <p>
+                    زبان مازندرانی (طبری) زبانی مستقل از خانواده‌ی زبان‌های ایرانی شمال‌غربی است و با گیلکی تفاوت‌های ساختاری و واژگانی فراوان دارد. هرچند هر دو زبان در کنار دریای خزر سخن گفته می‌شوند، اما آواشناسی، دستور و واژگان آن‌ها به‌اندازه‌ی فارسی و کردی از هم فاصله دارند. طبری با بیش از سه میلیون گویشور، سومین زبان ایرانی از نظر شمار گویشوران است. واژگانی که در اینجا می‌بینید مستقیماً از گویشوران بومی مازندران جمع‌آوری شده و بازتاب‌دهنده‌ی زبان روزمره‌ی طبری هستند — نه واژگان کتابی یا بازسازی‌شده. هر واژه‌ی طبری، پنجره‌ای به جهانی فرهنگی است که در خطر فراموشی قرار دارد.
+                </p>
+            </div>
+            <div class="about-image reveal" style="transition-delay:.15s">
+                <img src="https://picsum.photos/seed/green-rice-terrace-field/800/1000" alt="شالیزار مازندران" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- فوتر -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-inner">
+            <div class="footer-logo">زوون مازنی</div>
+            <p>
+                زبان مازندرانی یا طبری، یکی از زبان‌های ایرانی شمال‌غربی است که در استان مازندران و بخش‌هایی از گلستان و سمنان گویشور دارد. این زبان با بیش از سه میلیون گویشور، پس از فارسی و کردی، سومین زبان ایرانی از نظر تعداد گویشور است. با وجود این گستردگی، زبان طبری فاقد نظام نگارش استاندارد و آموزش رسمی است و بسیاری از جوانان مازندرانی امروز به جای طبری، فارسی را زبان اول خود می‌دانند. «زوون مازنی» با هدف حفظ و ترویج این میراث زبانی ساخته شده و تلاش می‌کند یادگیری واژگان طبری را برای همه آسان‌تر کند. این پروژه به کمک گویشوران بومی نیاز دارد.
+            </p>
+            <div class="footer-credit">
+                <span>ساخته‌شده با دقت برای مازندران</span>
+                <span id="footerYear"></span>
+            </div>
+        </div>
+    </footer>
+
+<script>
+/* ================================================================
+   داده‌ی واژگان — مستقیماً از گویشوران بومی مازندران
+   ================================================================ */
+const vocabulary = {
+    greetings: {
+        name: 'احوالپرسی',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+        words: [
+            { maz: 'سِلام', fa: 'سلام', pron: 'selâm' },
+            { maz: 'خاری', fa: 'خوبی', pron: 'khâri' },
+            { maz: 'چِتی هَسی', fa: 'چطوری', pron: 'cheti hâsi' },
+            { maz: 'شوخِش', fa: 'شب بخیر', pron: 'shukhesh' },
+            { maz: 'صِب بِخیر', fa: 'صبح بخیر', pron: 'sab bekhir' },
+            { maz: 'خاره', fa: 'خوب است', pron: 'khâre' },
+            { maz: 'تی دا', fa: 'فدای تو', pron: 'ti dâ' },
+            { maz: 'ناخِش', fa: 'خوش نیست', pron: 'nâkhesh' },
+            { maz: 'خِل خِلی', fa: 'خول خولی', pron: 'khel kheli' },
+            { maz: 'ول هاکن', fa: 'ول کن', pron: 'vol hâkon' },
+            { maz: 'داینی', fa: 'داری', pron: 'dâyni' },
+            { maz: 'تره', fa: 'به تو', pron: 'tere' }
+        ]
+    },
+    family: {
+        name: 'خانواده و بدن',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>',
+        words: [
+            { maz: 'پِر', fa: 'پدر', pron: 'per' },
+            { maz: 'مار', fa: 'مادر', pron: 'mâr' },
+            { maz: 'بِرار', fa: 'برادر', pron: 'berâr' },
+            { maz: 'خاخِر', fa: 'خواهر', pron: 'khâkher' },
+            { maz: 'کیجا', fa: 'دختر', pron: 'kijâ' },
+            { maz: 'ریکا', fa: 'پسر', pron: 'rikâ' },
+            { maz: 'وَچه', fa: 'بچه', pron: 'vâche' },
+            { maz: 'گَد بَبا', fa: 'پدربزرگ', pron: 'gad bâbâ' },
+            { maz: 'گَد نَنه', fa: 'مادربزرگ', pron: 'gad nâne' },
+            { maz: 'کینگ', fa: 'باسن', pron: 'king' },
+            { maz: 'کَله', fa: 'سر', pron: 'kale' },
+            { maz: 'دِل', fa: 'دل', pron: 'del' }
+        ]
+    },
+    nature: {
+        name: 'طبیعت و مکان',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 015 7l6-5 6 5a7 7 0 01-1 13h-5z"/><path d="M11 20v-8"/></svg>',
+        words: [
+            { maz: 'او', fa: 'آب', pron: 'u' },
+            { maz: 'وارش', fa: 'بارون', pron: 'vâresh' },
+            { maz: 'دار', fa: 'درخت', pron: 'dâr' },
+            { maz: 'بِن', fa: 'زیر', pron: 'ben' },
+            { maz: 'وَرف', fa: 'برف', pron: 'varf' },
+            { maz: 'کِنِس', fa: 'ازگیل جنگلی', pron: 'kenes' },
+            { maz: 'ماز', fa: 'پشه', pron: 'mâz' },
+            { maz: 'هَلی', fa: 'الوچه سبز', pron: 'hali' },
+            { maz: 'هَستِکا', fa: 'هسته میوه', pron: 'hastekâ' },
+            { maz: 'نماشون', fa: 'غروب آفتاب', pron: 'nemâshun' },
+            { maz: 'صواحی', fa: 'دم دمای صبح', pron: 'savâhi' },
+            { maz: 'شال', fa: 'روباه', pron: 'shâl' },
+            { maz: 'سِره', fa: 'خانه', pron: 'sere' },
+            { maz: 'سازه کَتین', fa: 'جارو دستی', pron: 'sâze katin' },
+            { maz: 'لمپا', fa: 'چراغ', pron: 'lampâ' },
+            { maz: 'سوو', fa: 'نور', pron: 'su' },
+            { maz: 'مَحلِ', fa: 'محله', pron: 'mahal' },
+            { maz: 'کِنج', fa: 'گوشه', pron: 'kenj' },
+            { maz: 'چو', fa: 'چوب', pron: 'chu' }
+        ]
+    },
+    verbs: {
+        name: 'افعال',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+        words: [
+            { maz: 'شومه', fa: 'میرم', pron: 'shume' },
+            { maz: 'شونی', fa: 'میری', pron: 'shuni' },
+            { maz: 'شونه', fa: 'میره', pron: 'shune' },
+            { maz: 'خِیمه', fa: 'میخورم', pron: 'khime' },
+            { maz: 'خِینی', fa: 'میخوری', pron: 'khini' },
+            { maz: 'کِمه', fa: 'میکنم', pron: 'keme' },
+            { maz: 'خامه', fa: 'میخوام', pron: 'khâme' },
+            { maz: 'دِمه', fa: 'میدم', pron: 'deme' },
+            { maz: 'بَیره', fa: 'بگیره', pron: 'bire' },
+            { maz: 'بَووین', fa: 'ببین', pron: 'bovin' },
+            { maz: 'دَره', fa: 'هست', pron: 'dare' },
+            { maz: 'هاکِنه', fa: 'کند', pron: 'hâkene' },
+            { maz: 'خانه', fa: 'میخواهد', pron: 'khâne' },
+            { maz: 'کَشِنه', fa: 'میکشد', pron: 'keshene' },
+            { maz: 'بِکِش', fa: 'بکش', pron: 'bakesh' },
+            { maz: 'کَشِنی', fa: 'میکشی', pron: 'kesheni' },
+            { maz: 'بَلِس', fa: 'لیس بزن', pron: 'bales' },
+            { maz: 'دِمِده', fa: 'بنداز', pron: 'demde' },
+            { maz: 'بَوویی', fa: 'بگویی', pron: 'bovi' },
+            { maz: 'دَووش', fa: 'باش', pron: 'davush' },
+            { maz: 'دَووشی', fa: 'باشی', pron: 'davushi' },
+            { maz: 'هارِش', fa: 'نگاه کن', pron: 'hâresh' },
+            { maz: 'هِنیش', fa: 'بشین', pron: 'henish' },
+            { maz: 'راهی هاکِن', fa: 'بفرست', pron: 'rahi hâkon' },
+            { maz: 'بَخِریم', fa: 'بخوریم', pron: 'bakhérim' },
+            { maz: 'لاب زَمه', fa: 'پاره میکنم', pron: 'lâb zame' },
+            { maz: 'بَرِس', fa: 'برس', pron: 'bares' }
+        ]
+    },
+    common: {
+        name: 'واژه‌های پایه',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+        words: [
+            { maz: 'میی', fa: 'من', pron: 'miy' },
+            { maz: 'تِه', fa: 'تو', pron: 'te' },
+            { maz: 'اِما', fa: 'ما', pron: 'emâ' },
+            { maz: 'مو', fa: 'مو', pron: 'mu' },
+            { maz: 'وه', fa: 'این', pron: 've' },
+            { maz: 'وِره', fa: 'اینو', pron: 'vere' },
+            { maz: 'شه', fa: 'برای خود', pron: 'she' },
+            { maz: 'شِه دِل', fa: 'دل من', pron: 'she del' },
+            { maz: 'شِه خِد', fa: 'خودمو', pron: 'she khed' },
+            { maz: 'شِه بِخِد', fa: 'الکی', pron: 'she bekhed' },
+            { maz: 'گَد', fa: 'بزرگ', pron: 'gad' },
+            { maz: 'کِچیک', fa: 'کوچیک', pron: 'kechik' },
+            { maz: 'خار', fa: 'خوب', pron: 'khâr' },
+            { maz: 'خَله', fa: 'خیلی', pron: 'khale' },
+            { maz: 'وِنه', fa: 'باید', pron: 'vne' },
+            { maz: 'اَنه', fa: 'انقدر', pron: 'âne' },
+            { maz: 'بَوه', fa: 'شود', pron: 'bave' },
+            { maz: 'اَمشو', fa: 'امشب', pron: 'âmshu' },
+            { maz: 'هَرشو', fa: 'هرشب', pron: 'harshu' },
+            { maz: 'چار', fa: 'چهار', pron: 'châr' },
+            { maz: 'اَتا', fa: 'یدونه', pron: 'atâ' },
+            { maz: 'ره', fa: 'رو', pron: 're' },
+            { maz: 'کِجه', fa: 'کجا', pron: 'keje' },
+            { maz: 'تِه سِه', fa: 'برای تو', pron: 'te se' },
+            { maz: 'مِسه', fa: 'برای من', pron: 'mese' },
+            { maz: 'نَدومبه', fa: 'نمیدانم', pron: 'nâdombe' },
+            { maz: 'بشنویین', fa: 'بشنوین', pron: 'beshnuvin' },
+            { maz: 'چاک چاک', fa: 'پاره و پوره', pron: 'châk châk' },
+            { maz: 'بَیمه', fa: 'شدم', pron: 'bâyme' },
+            { maz: 'وَرمه', fa: 'میبرم', pron: 'varme' },
+            { maz: 'وومه', fa: 'میشم', pron: 'vume' },
+            { maz: 'بوردی', fa: 'رفتی', pron: 'bordi' },
+            { maz: 'بورده', fa: 'رفت', pron: 'borde' },
+            { maz: 'بوردمه', fa: 'بردم', pron: 'boordeme' },
+            { maz: 'دِرو', fa: 'دروغ', pron: 'deru' },
+            { maz: 'بشکسته', fa: 'شکست', pron: 'beshkaste' },
+            { maz: 'نارنی', fa: 'نداری', pron: 'nârni' },
+            { maz: 'دِلِ سَر', fa: 'روی دل', pron: 'del sar' },
+            { maz: 'بییمو', fa: 'اومد', pron: 'biymu' },
+            { maz: 'هِدا', fa: 'داد', pron: 'hedâ' },
+            { maz: 'بَمِردی', fa: 'مردی', pron: 'bamermi' },
+            { maz: 'ویچارمه', fa: 'بیدارم', pron: 'vichârme' },
+            { maz: 'میی کَله', fa: 'سرمن', pron: 'miy kale' },
+            { maz: 'نیشت بیه', fa: 'نشسته بود', pron: 'nisht bie' },
+            { maz: 'تِه دَنی', fa: 'تو نیستی', pron: 'te dani' },
+            { maz: 'اوزی', fa: 'آب بازی', pron: 'uzi' },
+            { maz: 'هاکردی', fa: 'کردی', pron: 'hâkardi' },
+            { maz: 'تِسه', fa: 'برای تو', pron: 'tese' },
+            { maz: 'دونه', fa: 'میدونه', pron: 'dune' },
+            { maz: 'بِرمه', fa: 'گریه', pron: 'berme' },
+            { maz: 'موسی', fa: 'کونی', pron: 'musi' },
+            { maz: 'وَچه موس', fa: 'بچه کونی', pron: 'vâche mus' }
+        ]
+    }
+};
+
+/* ================================================================
+   صرف فعل «رفتن»
+   ================================================================ */
+const conjugation = {
+    tenses: ['گذشته', 'حال', 'آینده'],
+    persons: ['اول شخص', 'دوم شخص', 'سوم شخص', 'اول جمع', 'دوم جمع', 'سوم جمع'],
+    data: [
+        /* گذشته */
+        [
+            { maz: 'بوردمه', fa: 'رفتم', pron: 'boordeme' },
+            { maz: 'بوردی',   fa: 'رفتی', pron: 'boordi' },
+            { maz: 'بورده',   fa: 'رفت',  pron: 'boorde' },
+            { maz: 'بوردمی',  fa: 'رفتیم', pron: 'boordemi' },
+            { maz: 'بوردنی',  fa: 'رفتین', pron: 'boordeni' },
+            { maz: 'بوردنه',  fa: 'رفتن', pron: 'boordene' }
+        ],
+        /* حال */
+        [
+            { maz: 'شومبه', fa: 'میرم',  pron: 'shoombe' },
+            { maz: 'شونی',   fa: 'میری',  pron: 'shooni' },
+            { maz: 'شونه',   fa: 'میره',  pron: 'shoone' },
+            { maz: 'شومبی',  fa: 'میریم', pron: 'shoombi' },
+            { maz: 'شورنی',  fa: 'میرین', pron: 'shoorni' },
+            { maz: 'شورنه',  fa: 'میرن',  pron: 'shoorne' }
+        ],
+        /* آینده */
+        [
+            { maz: 'خان بورم',  fa: 'می‌خوام برم',  pron: 'khaan boorem' },
+            { maz: 'خان بوری',  fa: 'می‌خوای بری',  pron: 'khaan boori' },
+            { maz: 'خان بوره',  fa: 'می‌خواد بره',  pron: 'khaan boore' },
+            { maz: 'خان بوریم', fa: 'می‌خوایم بریم', pron: 'khaan boorim' },
+            { maz: 'خان بورین', fa: 'می‌خواین برین', pron: 'khaan boorin' },
+            { maz: 'خان بورن',  fa: 'می‌خوان برن',  pron: 'khaan booren' }
+        ]
+    ]
+};
+
+/* ================================================================
+   وضعیت
+   ================================================================ */
+let currentCategory = 'greetings';
+let currentIndex = 0;
+let isFlipped = false;
+const seenWords = new Set();
+
+/* ================================================================
+   ابزارها
+   ================================================================ */
+const PD = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+function toPersian(n) { return String(n).replace(/[0-9]/g, d => PD[d]); }
+function getTotal() { return Object.values(vocabulary).reduce((s, c) => s + c.words.length, 0); }
+function wid(c, i) { return c + '-' + i; }
+function words() { return vocabulary[currentCategory].words; }
+
+/* ================================================================
+   رندر تب‌ها
+   ================================================================ */
+function renderTabs() {
+    const el = document.getElementById('fcTabs');
+    el.innerHTML = '';
+    Object.entries(vocabulary).forEach(([key, cat]) => {
+        const btn = document.createElement('button');
+        btn.className = 'fc-tab' + (key === currentCategory ? ' active' : '');
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', key === currentCategory);
+        btn.dataset.cat = key;
+        btn.innerHTML = cat.icon + '<span class="tab-text">' + cat.name + '</span>';
+        btn.addEventListener('click', () => switchCat(key));
+        el.appendChild(btn);
+    });
+}
+
+/* ================================================================
+   رندر کارت
+   ================================================================ */
+function renderCard(anim) {
+    const w = words()[currentIndex];
+    const inner = document.getElementById('cardInner');
+    if (isFlipped) { isFlipped = false; inner.classList.remove('flipped'); }
+
+    document.getElementById('cardWordMaz').textContent = w.maz;
+    document.getElementById('cardPron').textContent = w.pron;
+    document.getElementById('cardWordFa').textContent = w.fa;
+    document.getElementById('cardNum').textContent = toPersian(currentIndex + 1) + ' / ' + toPersian(words().length);
+    document.getElementById('fcCounter').textContent = toPersian(currentIndex + 1) + ' از ' + toPersian(words().length);
+    document.getElementById('btnPrev').disabled = (currentIndex === 0);
+    document.getElementById('btnNext').disabled = (currentIndex === words().length - 1);
+
+    seenWords.add(wid(currentCategory, currentIndex));
+    document.getElementById('seenCount').textContent = toPersian(seenWords.size);
+
+    if (anim) {
+        const c = document.getElementById('cardContainer');
+        c.classList.remove('card-enter');
+        void c.offsetWidth;
+        c.classList.add('card-enter');
+    }
+    renderPeek();
+    renderStrip();
+}
+
+/* ================================================================
+   کارت‌های کناری
+   ================================================================ */
+function renderPeek() {
+    const w = words();
+    const prev = document.getElementById('peekPrev');
+    const next = document.getElementById('peekNext');
+    if (currentIndex > 0) { prev.textContent = w[currentIndex - 1].maz; prev.classList.add('visible'); }
+    else { prev.classList.remove('visible'); }
+    if (currentIndex < w.length - 1) { next.textContent = w[currentIndex + 1].maz; next.classList.add('visible'); }
+    else { next.classList.remove('visible'); }
+}
+
+/* ================================================================
+   نوار واژه‌ها
+   ================================================================ */
+function renderStrip() {
+    const el = document.getElementById('wordStrip');
+    el.innerHTML = '';
+    words().forEach((w, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'fc-strip-item' + (i === currentIndex ? ' active' : '');
+        btn.setAttribute('role', 'option');
+        btn.textContent = w.maz;
+        btn.addEventListener('click', () => goTo(i));
+        el.appendChild(btn);
+    });
+    requestAnimationFrame(() => {
+        const a = el.querySelector('.active');
+        if (a) a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+}
+
+/* ================================================================
+   کنترل‌ها
+   ================================================================ */
+function switchCat(key) { currentCategory = key; currentIndex = 0; renderTabs(); renderCard(true); }
+function goTo(i) { if (i === currentIndex) return; currentIndex = i; renderCard(true); }
+function goNext() { if (currentIndex < words().length - 1) { currentIndex++; renderCard(true); } }
+function goPrev() { if (currentIndex > 0) { currentIndex--; renderCard(true); } }
+function flip() { isFlipped = !isFlipped; document.getElementById('cardInner').classList.toggle('flipped', isFlipped); }
+
+/* ================================================================
+   هیرو
+   ================================================================ */
+function renderHero() {
+    const all = Object.values(vocabulary).flatMap(c => c.words);
+    const d = new Date();
+    const s = new Date(d.getFullYear(), 0, 0);
+    const doy = Math.floor((d - s) / 86400000);
+    const w = all[doy % all.length];
+    document.getElementById('heroWord').textContent = w.maz;
+    document.getElementById('heroTranslation').textContent = w.fa;
+    document.getElementById('heroPron').textContent = w.pron;
+    const py = d.getFullYear() - 621;
+    document.getElementById('heroDate').textContent = toPersian(py);
+    document.getElementById('footerYear').textContent = toPersian(py);
+    document.getElementById('totalWords').textContent = toPersian(getTotal());
+}
+
+/* ================================================================
+   صرف فعل
+   ================================================================ */
+function renderConjugation() {
+    const table = document.getElementById('conjTable');
+    let html = '<thead><tr><th></th>';
+    conjugation.tenses.forEach(t => { html += '<th>' + t + '</th>'; });
+    html += '</tr></thead><tbody>';
+    conjugation.persons.forEach((p, pi) => {
+        html += '<tr><td class="person-cell">' + p + '</td>';
+        conjugation.data.forEach(tense => {
+            const c = tense[pi];
+            html += '<td><span class="conj-maz">' + c.maz + '</span><span class="conj-fa">' + c.fa + '</span><span class="conj-pron">' + c.pron + '</span></td>';
+        });
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+}
+
+/* ================================================================
+   اسکرول
+   ================================================================ */
+function initScroll() {
+    const nav = document.getElementById('navbar');
+    const hero = document.getElementById('hero');
+    new IntersectionObserver(([e]) => { nav.classList.toggle('scrolled', !e.isIntersecting); }, { threshold: 0.12 }).observe(hero);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+        new IntersectionObserver(([e]) => { if (e.isIntersecting) el.classList.add('visible'); }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }).observe(el);
+    });
+}
+
+/* ================================================================
+   رویدادها
+   ================================================================ */
+function initEvents() {
+    const cc = document.getElementById('cardContainer');
+    cc.addEventListener('click', flip);
+    cc.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    document.getElementById('btnNext').addEventListener('click', goNext);
+    document.getElementById('btnPrev').addEventListener('click', goPrev);
+
+    document.addEventListener('keydown', e => {
+        if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); goNext(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); goPrev(); }
+    });
+
+    /* تاچ‌اسوایپ */
+    let sx = 0;
+    const area = document.getElementById('fcCardArea');
+    area.addEventListener('touchstart', e => { sx = e.changedTouches[0].screenX; }, { passive: true });
+    area.addEventListener('touchend', e => {
+        const diff = sx - e.changedTouches[0].screenX;
+        if (Math.abs(diff) > 50) { diff > 0 ? goNext() : goPrev(); }
+    }, { passive: true });
+}
+
+/* ================================================================
+   راه‌اندازی
+   ================================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    renderHero();
+    renderTabs();
+    renderCard(false);
+    renderConjugation();
+    initScroll();
+    initEvents();
+});
+</script>
+</body>
+</html>
