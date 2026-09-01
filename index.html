@@ -165,6 +165,28 @@
         }
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero-bg{animation:none}.scroll-indicator{animation:none}}
         :focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+
+        /* راهنمای شروع کار (تور آموزشی) */
+        .tour-overlay{position:fixed;inset:0;z-index:9998;cursor:pointer}
+        .tour-overlay[hidden]{display:none}
+        .tour-spotlight{position:fixed;z-index:9998;border:2px solid var(--accent-gold);border-radius:8px;box-shadow:0 0 0 2000px rgba(26,23,20,.85);transition:top .5s cubic-bezier(.4,0,.2,1),left .5s cubic-bezier(.4,0,.2,1),width .5s cubic-bezier(.4,0,.2,1),height .5s cubic-bezier(.4,0,.2,1);pointer-events:none}
+        .tour-tooltip{position:fixed;z-index:9999;max-width:320px;background:var(--bg-cream-light);border:1px solid var(--border-warm);border-radius:8px;padding:1.5rem;box-shadow:0 12px 40px rgba(0,0,0,.35);transition:top .5s cubic-bezier(.4,0,.2,1),left .5s cubic-bezier(.4,0,.2,1),opacity .3s;cursor:default}
+        .tour-step-num{display:inline-block;font-size:.62rem;font-weight:700;color:var(--accent-gold);letter-spacing:.12em;margin-bottom:.6rem}
+        .tour-tooltip h3{font-size:.95rem;font-weight:800;color:var(--fg-dark);margin-bottom:.5rem;line-height:1.5}
+        .tour-tooltip p{font-size:.8rem;font-weight:300;color:var(--fg-muted);line-height:1.9;margin-bottom:1.1rem}
+        .tour-controls{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+        .tour-dots{display:flex;gap:.35rem}
+        .tour-dot{width:6px;height:6px;border-radius:50%;background:var(--border-warm)}
+        .tour-dot.active{background:var(--accent-gold)}
+        .tour-skip-btn,.tour-next-btn{font-size:.72rem;font-weight:500;font-family:inherit;border-radius:2px;cursor:pointer;padding:.5rem 1rem;transition:all .2s}
+        .tour-skip-btn{background:none;border:1px solid var(--border-warm);color:var(--fg-muted)}
+        .tour-skip-btn:hover{color:var(--fg-dark);border-color:var(--fg-dark)}
+        .tour-next-btn{background:var(--fg-dark);border:1px solid var(--fg-dark);color:var(--fg-light)}
+        .tour-next-btn:hover{background:var(--accent-gold);border-color:var(--accent-gold)}
+        .tour-hint{font-size:.62rem;font-weight:300;color:var(--fg-muted-light);margin-top:.9rem;text-align:center}
+        .tour-replay-btn{position:fixed;bottom:1.5rem;left:1.5rem;z-index:500;width:42px;height:42px;border-radius:50%;background:var(--bg-dark);color:var(--accent-gold);border:1px solid var(--accent-gold);font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:transform .2s}
+        .tour-replay-btn:hover{transform:scale(1.08)}
+        @media(max-width:480px){.tour-tooltip{max-width:88vw;padding:1.1rem}}
     </style>
 </head>
 <body>
@@ -295,6 +317,23 @@
             </div>
         </div>
     </footer>
+
+    <!-- راهنمای شروع کار -->
+    <div class="tour-overlay" id="tourOverlay" hidden>
+        <div class="tour-spotlight" id="tourSpotlight"></div>
+        <div class="tour-tooltip" id="tourTooltip">
+            <span class="tour-step-num" id="tourStepNum">راهنمای برنامه</span>
+            <h3 id="tourTitle"></h3>
+            <p id="tourText"></p>
+            <div class="tour-controls">
+                <button class="tour-skip-btn" id="tourSkip" type="button">رد شدن</button>
+                <div class="tour-dots" id="tourDots"></div>
+                <button class="tour-next-btn" id="tourNext" type="button">بعدی</button>
+            </div>
+            <div class="tour-hint">برای رفتن به مرحله‌ی بعد، هر جای صفحه رو هم می‌تونی کلیک کنی</div>
+        </div>
+    </div>
+    <button class="tour-replay-btn" id="tourReplayBtn" type="button" aria-label="نمایش دوباره‌ی راهنما" title="راهنمای برنامه">؟</button>
 
 <script>
 /* ================================================================
@@ -676,6 +715,114 @@ function initEvents() {
 }
 
 /* ================================================================
+   راهنمای شروع کار (تور آموزشی)
+   ================================================================ */
+const TOUR_KEY = 'zm_tour_completed_v1';
+const tourSteps = [
+    { selector: '.nav-logo', title: '۱ / ۹ — لوگو و نام برنامه', text: 'اینجا «زوون مازنی»ه؛ برنامه‌ای برای یادگیری واژگان و زبان مازندرانی (طبری).' },
+    { selector: '.hero-content', title: '۲ / ۹ — واژه‌ی روز', text: 'هر بار سر بزنی، یک واژه‌ی مازندرانی به‌همراه معنی فارسی و طرز تلفظش نشونت داده میشه؛ هر روز عوض میشه.' },
+    { selector: '.stats-bar', title: '۳ / ۹ — آمار', text: 'تعداد کل واژه‌ها، تعداد دسته‌بندی‌ها، گویش، و تعداد واژه‌هایی که تا الان دیدی، اینجا نشون داده میشه.' },
+    { selector: '#fcTabs', title: '۴ / ۹ — دسته‌بندی‌ها', text: 'واژه‌ها بر اساس موضوع (احوالپرسی، خانواده، طبیعت، افعال و...) دسته‌بندی شدن. با زدن روی هرکدوم، فلش‌کارت‌های همون دسته باز میشه.' },
+    { selector: '#cardContainer', title: '۵ / ۹ — فلش‌کارت', text: 'روی خود کارت کلیک کن تا برگرده و معنی فارسیش رو ببینی؛ دوباره کلیک کن تا برگرده به حالت اول.' },
+    { selector: '.fc-nav', title: '۶ / ۹ — جابه‌جایی بین واژه‌ها', text: 'با این دو دکمه (یا کلیدهای چپ/راست کیبورد، یا کشیدن انگشت روی گوشی) بین واژه‌های یک دسته جلو و عقب برو.' },
+    { selector: '#wordStrip', title: '۷ / ۹ — لیست واژه‌ها', text: 'این نوار، همه‌ی واژه‌های دسته‌ی فعلی رو کنار هم نشون میده؛ با زدن روی هرکدوم مستقیم همون واژه باز میشه.' },
+    { selector: '#conjugation .conj-inner', title: '۸ / ۹ — صرف فعل', text: 'این بخش صرف فعل «رفتن» رو در سه زمان گذشته، حال و آینده به گویش مازندرانی همراه با تلفظ فارسی نشون میده.' },
+    { selector: '.about-text', title: '۹ / ۹ — درباره‌ی زبان طبری', text: 'اینجا درباره‌ی زبان مازندرانی (طبری)، تفاوتش با گیلکی، و اهمیت حفظ این زبان توضیح داده شده. تور همین‌جا تموم میشه.' }
+];
+let tourIndex = 0;
+
+function tourRectFor(el) {
+    const r = el.getBoundingClientRect();
+    const pad = 10;
+    return { top: r.top - pad, left: r.left - pad, width: r.width + pad * 2, height: r.height + pad * 2 };
+}
+
+function placeTourTooltip(spotRect) {
+    const tooltip = document.getElementById('tourTooltip');
+    tooltip.style.opacity = '0';
+    requestAnimationFrame(() => {
+        const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const spaceBelow = vh - (spotRect.top + spotRect.height);
+        const spaceAbove = spotRect.top;
+        let top;
+        if (spaceBelow > th + 24) top = spotRect.top + spotRect.height + 16;
+        else if (spaceAbove > th + 24) top = spotRect.top - th - 16;
+        else top = (vh - th) / 2;
+        top = Math.min(Math.max(16, top), vh - th - 16);
+        let left = spotRect.left + spotRect.width / 2 - tw / 2;
+        left = Math.min(Math.max(16, left), vw - tw - 16);
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+        tooltip.style.opacity = '1';
+    });
+}
+
+function renderTourDots() {
+    const el = document.getElementById('tourDots');
+    el.innerHTML = '';
+    tourSteps.forEach((_, i) => {
+        const d = document.createElement('span');
+        d.className = 'tour-dot' + (i === tourIndex ? ' active' : '');
+        el.appendChild(d);
+    });
+}
+
+function showTourStep(i) {
+    const step = tourSteps[i];
+    const el = document.querySelector(step.selector);
+    if (!el) { endTour(); return; }
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('tourTitle').textContent = step.title;
+    document.getElementById('tourText').textContent = step.text;
+    document.getElementById('tourNext').textContent = (i === tourSteps.length - 1) ? 'شروع کن' : 'بعدی';
+    renderTourDots();
+    setTimeout(() => {
+        const r = tourRectFor(el);
+        const spot = document.getElementById('tourSpotlight');
+        spot.style.top = r.top + 'px';
+        spot.style.left = r.left + 'px';
+        spot.style.width = r.width + 'px';
+        spot.style.height = r.height + 'px';
+        placeTourTooltip(r);
+    }, 380);
+}
+
+function startTour() {
+    tourIndex = 0;
+    document.getElementById('tourOverlay').hidden = false;
+    showTourStep(tourIndex);
+}
+
+function nextTourStep() {
+    tourIndex++;
+    if (tourIndex >= tourSteps.length) { endTour(); return; }
+    showTourStep(tourIndex);
+}
+
+function endTour() {
+    document.getElementById('tourOverlay').hidden = true;
+    try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
+}
+
+function initTour() {
+    document.getElementById('tourOverlay').addEventListener('click', (e) => {
+        if (e.target.closest('#tourSkip') || e.target.closest('#tourNext')) return;
+        nextTourStep();
+    });
+    document.getElementById('tourNext').addEventListener('click', (e) => { e.stopPropagation(); nextTourStep(); });
+    document.getElementById('tourSkip').addEventListener('click', (e) => { e.stopPropagation(); endTour(); });
+    document.getElementById('tourReplayBtn').addEventListener('click', startTour);
+    window.addEventListener('resize', () => {
+        if (!document.getElementById('tourOverlay').hidden) showTourStep(tourIndex);
+    });
+
+    let seen = false;
+    try { seen = localStorage.getItem(TOUR_KEY) === '1'; } catch (e) {}
+    if (!seen) setTimeout(startTour, 900);
+}
+
+/* ================================================================
    راه‌اندازی
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -685,6 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderConjugation();
     initScroll();
     initEvents();
+    initTour();
 });
 </script>
 </body>
