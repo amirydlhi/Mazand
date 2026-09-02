@@ -76,6 +76,7 @@
         .fc-card-container{position:relative;z-index:2;width:340px;height:400px;perspective:1200px;cursor:pointer}
         .fc-card-inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
         .fc-card-inner.flipped{transform:rotateY(180deg)}
+        .fc-card-inner.no-flip-transition{transition:none!important}
         .fc-card-face{position:absolute;inset:0;backface-visibility:hidden;background:var(--bg-cream-light);border:1px solid var(--border-warm);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 2rem;text-align:center}
         .fc-card-back{transform:rotateY(180deg)}
         .fc-card-label{position:absolute;top:1.5rem;right:1.5rem;font-size:.6rem;font-weight:400;color:var(--accent-gold);letter-spacing:.12em}
@@ -151,7 +152,7 @@
             .fc-card-area{height:380px}.fc-card-container{width:290px;height:350px}
             .fc-card-word{font-size:2.2rem}.fc-card-back .fc-card-word{font-size:1.8rem}
             .fc-peek{display:none}
-            .fc-tabs{gap:0;margin-bottom:2rem}.fc-tab{padding:.5rem .75rem;font-size:.72rem}.fc-tab span.tab-text{display:none}
+            .fc-tabs{gap:.15rem;margin-bottom:2rem}.fc-tab{flex-direction:column;gap:.3rem;padding:.55rem .5rem;font-size:.6rem;min-width:56px}.fc-tab span.tab-text{white-space:nowrap}
             .conj-section{padding:3.5rem 1rem}
             .conj-table{font-size:.9rem}.conj-maz{font-size:.95rem}
             .about-section{padding:4rem 1.25rem}
@@ -491,6 +492,36 @@ const vocabulary = {
             { maz: 'موسی', fa: 'کونی', pron: 'musi' },
             { maz: 'وَچه موس', fa: 'بچه کونی', pron: 'vâche mus' }
         ]
+    },
+    slang: {
+        name: 'اصطلاحات و فحش‌ها',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        words: [
+            { maz: 'شونگ شونگی', fa: 'جیغ جیغو', pron: 'shong shongi' },
+            { maz: 'خفه بواش', fa: 'خفه شو', pron: 'khafe bavâsh' },
+            { maz: 'غریب موسده', fa: 'شخصی که به غریبه بیشتر از آشنا محل می‌گذارد', pron: 'gharib musede' },
+            { maz: 'مول کته', fa: 'بچه حرام‌زاده', pron: 'mul kate' },
+            { maz: 'دل سگ', fa: 'گدا گشنه', pron: 'del sag' },
+            { maz: 'گی بَخِر', fa: 'ساکت شو', pron: 'gi bakher' },
+            { maz: 'گی نَخِر', fa: 'حرف نزن', pron: 'gi nakher' },
+            { maz: 'گی بَخِردی', fa: 'دروغ می‌گی', pron: 'gi bakherdi' },
+            { maz: 'مِه گی رِ خِرنی', fa: 'انقدر طبل توخالی نباش', pron: 'me gi re kherni' },
+            { maz: 'بوور گی بَخِر', fa: 'برو ببینم از جلو چشام', pron: 'buvar gi bakher' },
+            { maz: 'گی بَخِردِمه', fa: 'غلط کردم', pron: 'gi bakherdeme' },
+            { maz: 'شِه گی رِ خِرنه', fa: 'خسیسه', pron: 'she gi re kherne' },
+            { maz: 'گی خاری چه کنّی؟', fa: 'چرا دخالت می‌کنی؟', pron: 'gi khâri che kani?' },
+            { maz: 'کِنه گی رِ خوانی بَخِری؟', fa: 'هیچ غلطی نمی‌تونی بکنی', pron: 'kene gi re khâni bakheri?' },
+            { maz: 'گی وِنه دِله دَنیه', fa: 'چیزی توش نیست', pron: 'gi vene dele danie' },
+            { maz: 'گی به دِله', fa: 'لعنت بهش', pron: 'gi be dele' },
+            { maz: 'گی بَیه بوردِه', fa: 'له شد رفت', pron: 'gi baye borde' },
+            { maz: 'گی خار سگ', fa: 'آدمِ سخن‌چین', pron: 'gi khâr sag' },
+            { maz: 'گی دله نِخِد تیم', fa: 'فضول همه‌جا', pron: 'gi dele nekhed tim' },
+            { maz: 'گی به روح بیّه', fa: 'به درک واصل شد', pron: 'gi be ruh biye' },
+            { maz: 'گی ره با قاشوق جاپونی خرنه', fa: 'خیلی کلاس می‌ذاره', pron: 'gi re bâ ghâshogh jâponi khorne' },
+            { maz: 'آقا من ته گی هستمه', fa: 'آقا من کوچیکتم', pron: 'âghâ man te gi hasteme' },
+            { maz: 'اتی بمرده گی ره مونه', fa: 'خیلی شل و فس‌فسه', pron: 'ati bamorde gi re mune' },
+            { maz: 'ونه رنگ خوده گی', fa: 'رنگش پریده', pron: 'vene rang khode gi' }
+        ]
     }
 };
 
@@ -572,7 +603,17 @@ function renderTabs() {
 function renderCard(anim) {
     const w = words()[currentIndex];
     const inner = document.getElementById('cardInner');
-    if (isFlipped) { isFlipped = false; inner.classList.remove('flipped'); }
+    if (isFlipped) {
+        // اگه کارت برگشته بود (پشتش معلوم بود) و داریم می‌ریم سراغ کلمه‌ی بعدی/قبلی،
+        // نباید انیمیشن برگشتن (چرخش ۱۸۰ درجه‌ای) رو ببینیم چون یه لحظه محتوای
+        // کارت جدید رو از پشت نشون میده. برای همین ترنزیشن رو موقتاً خاموش می‌کنیم
+        // و بی‌واسطه برمی‌گردونیم به حالت جلو، بعد دوباره ترنزیشن رو روشن می‌کنیم.
+        isFlipped = false;
+        inner.classList.add('no-flip-transition');
+        inner.classList.remove('flipped');
+        void inner.offsetWidth;
+        requestAnimationFrame(() => { inner.classList.remove('no-flip-transition'); });
+    }
 
     document.getElementById('cardWordMaz').textContent = w.maz;
     document.getElementById('cardPron').textContent = w.pron;
@@ -717,10 +758,10 @@ function initEvents() {
 /* ================================================================
    راهنمای شروع کار (تور آموزشی)
    ================================================================ */
-const TOUR_KEY = 'zm_tour_completed_v1';
+const TOUR_KEY = 'zm_tour_completed_v2';
 const tourSteps = [
     { selector: '.nav-logo', title: '۱ / ۹ — لوگو و نام برنامه', text: 'اینجا «زوون مازنی»ه؛ برنامه‌ای برای یادگیری واژگان و زبان مازندرانی (طبری).' },
-    { selector: '.hero-content', title: '۲ / ۹ — واژه‌ی روز', text: 'هر بار سر بزنی، یک واژه‌ی مازندرانی به‌همراه معنی فارسی و طرز تلفظش نشونت داده میشه؛ هر روز عوض میشه.' },
+    { selector: '.hero-content', title: '۲ / ۹ — واژه‌ی روز', text: 'این باکس بالای صفحه، مستقل از فلش‌کارت‌های پایین‌تره: هر روز یک واژه‌ی مازندرانی از کل بانک واژه‌ها به‌طور خودکار انتخاب و همراه با معنی فارسی و طرز تلفظش نشون داده میشه.' },
     { selector: '.stats-bar', title: '۳ / ۹ — آمار', text: 'تعداد کل واژه‌ها، تعداد دسته‌بندی‌ها، گویش، و تعداد واژه‌هایی که تا الان دیدی، اینجا نشون داده میشه.' },
     { selector: '#fcTabs', title: '۴ / ۹ — دسته‌بندی‌ها', text: 'واژه‌ها بر اساس موضوع (احوالپرسی، خانواده، طبیعت، افعال و...) دسته‌بندی شدن. با زدن روی هرکدوم، فلش‌کارت‌های همون دسته باز میشه.' },
     { selector: '#cardContainer', title: '۵ / ۹ — فلش‌کارت', text: 'روی خود کارت کلیک کن تا برگرده و معنی فارسیش رو ببینی؛ دوباره کلیک کن تا برگرده به حالت اول.' },
@@ -768,24 +809,61 @@ function renderTourDots() {
     });
 }
 
+let tourWaitToken = 0;
+
+// روی موبایل، هایدشدن/ظاهرشدن نوار آدرس هنگام اسکرول ارتفاع صفحه رو تغییر میده؛
+// اگر فقط یه تایم‌اوت ثابت داشته باشیم، ممکنه اندازه‌گیری موقعیت قبل از تموم‌شدن
+// این تغییرات انجام بشه و اسپاتلایت جای اشتباهی ظاهر بشه. به‌جاش صبر می‌کنیم
+// تا اسکرول و ارتفاع viewport واقعاً ثابت بشه، بعد موقعیت رو حساب می‌کنیم.
+function waitForStableLayout(cb) {
+    const myToken = ++tourWaitToken;
+    let lastY = window.scrollY;
+    let lastH = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    let stableFrames = 0;
+    const maxWait = Date.now() + 1500;
+    function tick() {
+        if (myToken !== tourWaitToken) return; // مرحله عوض شده، این چک رو ول کن
+        const y = window.scrollY;
+        const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        if (y === lastY && h === lastH) {
+            stableFrames++;
+        } else {
+            stableFrames = 0;
+            lastY = y;
+            lastH = h;
+        }
+        if (stableFrames >= 6 || Date.now() > maxWait) { cb(); return; }
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+function positionTourOnElement(el) {
+    const r = tourRectFor(el);
+    const spot = document.getElementById('tourSpotlight');
+    spot.style.top = r.top + 'px';
+    spot.style.left = r.left + 'px';
+    spot.style.width = r.width + 'px';
+    spot.style.height = r.height + 'px';
+    placeTourTooltip(r);
+}
+
 function showTourStep(i) {
     const step = tourSteps[i];
     const el = document.querySelector(step.selector);
     if (!el) { endTour(); return; }
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     document.getElementById('tourTitle').textContent = step.title;
     document.getElementById('tourText').textContent = step.text;
     document.getElementById('tourNext').textContent = (i === tourSteps.length - 1) ? 'شروع کن' : 'بعدی';
     renderTourDots();
-    setTimeout(() => {
-        const r = tourRectFor(el);
-        const spot = document.getElementById('tourSpotlight');
-        spot.style.top = r.top + 'px';
-        spot.style.left = r.left + 'px';
-        spot.style.width = r.width + 'px';
-        spot.style.height = r.height + 'px';
-        placeTourTooltip(r);
-    }, 380);
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    waitForStableLayout(() => positionTourOnElement(el));
+}
+
+function repositionCurrentStep() {
+    if (document.getElementById('tourOverlay').hidden) return;
+    const el = document.querySelector(tourSteps[tourIndex].selector);
+    if (el) positionTourOnElement(el);
 }
 
 function startTour() {
@@ -813,9 +891,12 @@ function initTour() {
     document.getElementById('tourNext').addEventListener('click', (e) => { e.stopPropagation(); nextTourStep(); });
     document.getElementById('tourSkip').addEventListener('click', (e) => { e.stopPropagation(); endTour(); });
     document.getElementById('tourReplayBtn').addEventListener('click', startTour);
-    window.addEventListener('resize', () => {
-        if (!document.getElementById('tourOverlay').hidden) showTourStep(tourIndex);
-    });
+    window.addEventListener('resize', repositionCurrentStep);
+    window.addEventListener('orientationchange', () => waitForStableLayout(repositionCurrentStep));
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', repositionCurrentStep);
+        window.visualViewport.addEventListener('scroll', repositionCurrentStep);
+    }
 
     let seen = false;
     try { seen = localStorage.getItem(TOUR_KEY) === '1'; } catch (e) {}
